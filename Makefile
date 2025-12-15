@@ -1,3 +1,4 @@
+TARGET_COMPILE=
 ifndef TARGET_COMPILE
     $(error TARGET_COMPILE not set)
 endif
