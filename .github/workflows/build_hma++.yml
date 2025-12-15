@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      KP_DIR: ${{ github.workspace }}/kernelpatch
+      KP_DIR: ${{ github.workspace }}/KernelPatch
       TOOLCHAIN_VERSION: 14.2.rel1
 
     steps:
@@ -20,30 +20,28 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: bmax121/KernelPatch
-          path: /home/runner/work/HMAPlusPlus/HMAPlusPlus/KernelPatch
+          path: ${{ github.workspace }}/KernelPatch
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y wget tar xz-utils build-essential
 
       - name: Download ARM Toolchain
         run: |
-          mkdir $HOME/toolchain
+          mkdir -p $HOME/toolchain
           cd $HOME/toolchain
           wget -q https://developer.arm.com/-/media/Files/downloads/gnu/${{ env.TOOLCHAIN_VERSION }}/binrel/arm-gnu-toolchain-${{ env.TOOLCHAIN_VERSION }}-x86_64-aarch64-none-elf.tar.xz
           tar -xf arm-gnu-toolchain-${{ env.TOOLCHAIN_VERSION }}-x86_64-aarch64-none-elf.tar.xz
 
-      - name: Show toolchain version
-        run: ${{ env.TARGET_COMPILE }}gcc --version
-
-      - name: Insert TARGET_COMPILE
-        run: sed -i "s|^TARGET_COMPILE=.*|TARGET_COMPILE=$HOME/toolchain/arm-gnu-toolchain-14.2.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-|g" Makefile
-
-      - name: Build HMA++$HOME/toolchain/
+      - name: Patch Makefile TARGET_COMPILE
         run: |
-          make
+          sed -i "s|^TARGET_COMPILE=.*|TARGET_COMPILE=$HOME/toolchain/arm-gnu-toolchain-${{ env.TOOLCHAIN_VERSION }}-x86_64-aarch64-none-elf/bin/aarch64-none-elf-|g" Makefile
+
+      - name: Build HMA++
+        run: make clean && make
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: HMA-kpm
           path: HMA++.kpm
+
