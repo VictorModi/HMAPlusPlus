@@ -16,17 +16,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Checkout KernelPatch
-        uses: actions/checkout@v5
-        with:
-          repository: bmax121/KernelPatch
-          path: /home/runner/work/HMAPlusPlus/HMAPlusPlus/KernelPatch
-
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y wget tar xz-utils build-essential
 
       - name: Download ARM Toolchain
         run: |
+          mkdir $HOME/toolchain
+          cd $HOME/toolchain
           wget -q https://developer.arm.com/-/media/Files/downloads/gnu/${{ env.TOOLCHAIN_VERSION }}/binrel/arm-gnu-toolchain-${{ env.TOOLCHAIN_VERSION }}-x86_64-aarch64-none-elf.tar.xz
           tar -xf arm-gnu-toolchain-${{ env.TOOLCHAIN_VERSION }}-x86_64-aarch64-none-elf.tar.xz
 
@@ -36,7 +32,7 @@ jobs:
       - name: Insert TARGET_COMPILE
         run: sed -i "s|^TARGET_COMPILE=.*|TARGET_COMPILE=$HOME/toolchain/arm-gnu-toolchain-14.2.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-|g" Makefile
 
-      - name: Build HMA++
+      - name: Build HMA++$HOME/toolchain/
         run: |
           make
 
