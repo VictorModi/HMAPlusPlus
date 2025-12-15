@@ -1,0 +1,45 @@
+name: Build HMA++
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      KP_DIR: ${{ github.workspace }}/kernelpatch
+      TOOLCHAIN_VERSION: 14.2.rel1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y wget tar xz-utils build-essential
+
+      - name: Download ARM Toolchain
+        run: |
+          mkdir -p $HOME/toolchain
+          cd $HOME/toolchain
+          wget -q https://developer.arm.com/-/media/Files/downloads/gnu/14.2.rel1/binrel/arm-gnu-toolchain-$TOOLCHAIN_VERSION-x86_64-aarch64-none-elf.tar.xz
+          tar -xf arm-gnu-toolchain-$TOOLCHAIN_VERSION-x86_64-aarch64-none-elf.tar.xz
+
+      - name: Set TOOLCHAIN path
+        run: |
+          echo "##[set-env name=TARGET_COMPILE]$HOME/toolchain/arm-gnu-toolchain-$TOOLCHAIN_VERSION-x86_64-aarch64-none-elf/bin/aarch64-none-elf-" >> $GITHUB_ENV
+
+      - name: Show toolchain version
+        run: ${{ env.TARGET_COMPILE }}gcc --version
+
+      - name: Build HMA++
+        run: |
+          make clean
+          make all
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: HMA-kpm
+          path: HMA++.kpm
