@@ -16,6 +16,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Checkout KernelPatch
+        uses: actions/checkout@v5
+        with:
+          repository: bmax121/KernelPatch
+          path: /home/runner/work/HMAPlusPlus/HMAPlusPlus/KernelPatch
+
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y wget tar xz-utils build-essential
 
